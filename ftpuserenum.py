@@ -35,7 +35,15 @@ def main():
     read_socket_response(control_socket)
     with open(args.userfile) as f:
         for username in f:
-            control_socket.send(f"USER {username}\r\n".encode())
+            user_cmd = f"USER {username}\r\n".encode()
+            try:
+                control_socket.send(user_cmd)
+            except:
+                control_socket.close()
+                control_socket = create_control_socket((args.hostname, args.port))
+                read_socket_response(control_socket)
+                control_socket.send(user_cmd)
+
             resp = read_socket_response(control_socket)
             if resp.startswith('331'):
                 print(f"{username} --> found")
